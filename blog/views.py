@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.shortcuts import render, redirect, HttpResponse, get_object_or_404
+from django.shortcuts import render, redirect, HttpResponse, get_object_or_404,Http404
 from .models import *
 from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, RedirectView, TemplateView
@@ -15,17 +15,20 @@ from blog.models import Blog as BlogModel
 #     model = Blog
 #     context_object_name = 'home'
 #     template_name = 'index.html'
-
-class BlogView(TemplateView):
+class BlogView(ListView):
     model = Blog
     context_object_name = 'blog'
     template_name = 'blog.html'
+    ordering=['-date']
+    paginate_by=4
+    paginate_orphans=1
 
-    def get(self, request):
-        context = {
-            'blog': BlogModel.objects.all()
-        }
-        return render(request, self.template_name, context)
+    def get_context_data(self, *args,**kwargs):
+        try:
+            return super(BlogView, self).get_context_data(*args,**kwargs)
+        except Http404:
+            self.kwargs['page']=1
+            return super(BlogView, self).get_context_data(*args,**kwargs)
 
 
 def blog_details(request, id):

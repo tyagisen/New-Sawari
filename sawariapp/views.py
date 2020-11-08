@@ -3,7 +3,7 @@ from .forms import DriverForm
 from django.contrib import messages
 from django.core.mail import send_mail
 from django.conf import settings
-from django.http import HttpResponseRedirect
+from .models import *
 
 
 def sign(request):
@@ -16,6 +16,12 @@ def sign(request):
         message = "Name: " + message1 + "\n" + "Phone: " + message3 + "\n" + "Vehicle Type: " + message4
         if fm.is_valid():
             fm.save()
+            emp1.run()  # calling run function from models.py
+            # nm = fm.cleaned_data['name']
+            # ph = fm.cleaned_data['phone']
+            # vt = fm.cleaned_data['vehicle_type']
+            # driverform = Driver(name=nm, phone=ph, vehicle_type=vt)
+            # driverform.save()
             send_mail(
                 'Driver Form',
                 message,
@@ -25,13 +31,7 @@ def sign(request):
             )
             messages.add_message(request, messages.INFO, 'You Are Registerd')
             success = True
-            auth_token = '9ed2b99dfbf01e5e42b2ec57ff3cfb1f6e0923964fa331f8b7bf4a3b681d2284'
-            to = ['9800991847']
-            text = 'Hello'
-            print(text)
             fm = DriverForm()
-
-
     else:
         fm = DriverForm()
     return render(request, 'index.html', {'form': fm, 'success': success})
